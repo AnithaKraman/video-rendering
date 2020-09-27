@@ -63,7 +63,7 @@ if (req.body.captcha===undefined || req.body.captcha==='' || req.body.captcha===
   return (res.json({'success':false,'msg':'Please select capcha'}))
 }
 //secret key
-const secretKey='6LfYX8QZAAAAAFOp_VwVFAVHmXXKesAWucXnmrDy'
+const secretKey=Constants.Recaptcha.SERVER_KEY
 
 //verify URL
 const verifyURL=`https://google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${req.body.captcha}&remoteip=${req.connection.remoteAddress}`
@@ -134,27 +134,27 @@ app.post('/message', async (req, res) => {
       try {
         logger.debug("******************* Dispatch email invoked ********************************");     
         email.dispatchEmail(assignmentObj).then(
-          function (result) {
+          function () {
           logger.debug("******************* Email dispatched ********************************");  
           }  
         ).catch(function (err) {
           logger.error("Promise rejection error: " + err.stack);
-          logger.debug("******************* Exited Routes With Failure ********************************");
-          res.status(Constants.Response.CODE_INTRNL_SERV_ERR).send(Constants.Response.DESC_INTRNL_SERV_ERR);
+          logger.debug("******************* Errors with email dispatch ********************************");
+          // res.status(Constants.Response.CODE_INTRNL_SERV_ERR).send(Constants.Response.DESC_INTRNL_SERV_ERR);
         })
         sqlDS.createAssignment(assignmentObj).then(
           function (result) {
             logger.debug("******************* Exited Routes Successfully ********************************");
             return (res.json({'status':200, 'url':'/thankyou'}))
-            // return res.send({status:200, result: 'redirect', url:__dirname + '\\views\\thankyou'})
           }
         ).catch(function (err) {
           logger.error("Promise rejection error: " + err.stack);
           logger.debug("******************* Exited Routes With Failure ********************************");
           res.status(Constants.Response.CODE_INTRNL_SERV_ERR).send(Constants.Response.DESC_INTRNL_SERV_ERR);
-        }
-        );
-      } catch (e) {
+        });
+    //   })
+    }
+      catch (e) {
         logger.error(e)
         res.status(Constants.Response.CODE_INTRNL_SERV_ERR).send(Constants.Response.DESC_INTRNL_SERV_ERR);
       }
